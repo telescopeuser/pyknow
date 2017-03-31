@@ -232,6 +232,7 @@ class OrdinaryMatchNode(mixins.AnyChild,
     def __str__(self):
         return "%s (%s)" % (self.__class__.__name__, id(self))
 
+
 class ConflictSetNode(mixins.AnyChild,
                       OneInputNode):
     """
