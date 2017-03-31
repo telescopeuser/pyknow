@@ -111,11 +111,11 @@ class ReteMatcher(Matcher):
         def weighted_check_sort(check):
             """Sort check by its type and number of times seen."""
             if isinstance(check, TypeCheck):
-                return float('inf')
+                return (float('inf'), ) + check
             elif isinstance(check, FactCapture):
-                return float('-inf')
+                return (float('-inf'), ) + check
             elif isinstance(check, FeatureCheck):
-                return check_rank[check]
+                return (check_rank[check], ) + check
             else:
                 raise TypeError("Unknown check type.")  # pragma: no cover
 
@@ -180,25 +180,33 @@ class ReteMatcher(Matcher):
         Generate a graphviz compatible graph.
 
         """
-        edges = set()
+        from hashlib import md5
+        visited = set()
+
+        def hash_node(node):
+            name = str(node) + str(id(node))
+
+            return "node_" + md5(name.encode('utf-8')).hexdigest()
 
         def gen_edges(node):
-            nonlocal edges
-            name = str(id(node))
+            nonlocal visited
+            name = hash_node(node)  # str(id(node))
 
             yield '{name} [label="{cls_name}"];'.format(
                 name=name,
                 cls_name=str(node))
 
-            for child in node.children:
-                if (node, child.callback) not in edges:
+            if node not in visited:
+                visited.add(node)
+                for child in node.children:
+                    yield from gen_edges(child.node)
                     yield ('{parent} -> {child} '
                            '[label="{child_label}"];').format(
                         parent=name,
-                        child=str(id(child.node)),
+                        child=hash_node(child.node),  # str(id(child.node)),
                         child_label=child.callback.__name__)
-                    edges.add((node, child.callback))
-                yield from gen_edges(child.node)
+            else:
+                pass
 
         return "digraph {\n %s \n}" % ("\n".join(
             gen_edges(self.root_node)))

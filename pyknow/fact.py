@@ -58,12 +58,20 @@ class Fact(OperableCE, Bindable, dict):
             return "<f-%d>" % self.__factid__
 
     def __repr__(self):  # pragma: no cover
-        return "{}({})".format(
-            self.__class__.__name__,
-            ", ".join(
-                (repr(v) if isinstance(k, int) else "{}={!r}".format(k, v)
-                 for k, v in self.items()
-                 if not self.is_special(k))))
+        if self.has_field_constraints:
+            return "{}({})".format(
+                self.__class__.__name__,
+                ", ".join(
+                    (repr(v) if isinstance(k, int) else "{}={!r}".format(k, v)
+                     for k, v in self.items()
+                     )))
+        else:
+            return "{}({})".format(
+                self.__class__.__name__,
+                ", ".join(
+                    (repr(v) if isinstance(k, int) else "{}={!r}".format(k, v)
+                     for k, v in self.items()
+                     if not self.is_special(k))))
 
     def __hash__(self):
         try:

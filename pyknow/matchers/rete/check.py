@@ -94,7 +94,8 @@ class FeatureCheck(Check,
         res = self.check(record, self.expected)
 
         log = MATCH.info if res else MATCH.debug
-        log("what=%r, how=%r, fact=%s = %r", self.what, self.how, data, res)
+        log("what=%r, how=%r, fact_value=%s = %r",
+            self.what, self.how, data, res)
 
         return res
 
@@ -216,7 +217,7 @@ class FeatureCheck(Check,
                              check=or_match)
 
 
-class SameContextCheck(Check):
+class SameContextCheck(Check, tuple):
     def __call__(self, l, r):
         for key, value in l.items():
             if key[0] is False:

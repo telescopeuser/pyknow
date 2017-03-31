@@ -5,10 +5,11 @@ from collections import OrderedDict
 from functools import singledispatch
 from itertools import chain, product
 
-from pyknow.conditionalelement import AND, OR, NOT
-from pyknow.fieldconstraint import ORFC, NOTFC, ANDFC
+from pyknow.conditionalelement import AND, OR, NOT, UNIQUE
+from pyknow.fieldconstraint import ORFC, NOTFC, ANDFC, W
 from pyknow.rule import Rule
 from pyknow.fact import Fact
+from pyknow.watchers import COMPILATION
 
 
 def unpack_exp(exp, op):
@@ -26,6 +27,7 @@ def dnf(exp):
 
 @dnf.register(Rule)
 def _(exp):
+    initial = exp
     last, current = None, exp.new_conditions(*[dnf(e) for e in exp])
 
     while last != current:
@@ -33,7 +35,11 @@ def _(exp):
                          current.new_conditions(
                              *[dnf(e) for e in current]))
 
-    return current.new_conditions(*unpack_exp(current, AND))
+    final = current.new_conditions(*unpack_exp(current, AND))
+
+    COMPILATION.debug("Rule DNF: %r ===> %r", initial, final)
+
+    return final
 
 
 @dnf.register(NOT)
@@ -71,6 +77,24 @@ def _(exp):
         return OR(*[dnf(AND(*(and_part + [dnf(e)]))) for e in or_part])
     else:
         return AND(*[dnf(x) for x in unpack_exp(exp, AND)])
+
+
+@dnf.register(UNIQUE)
+def _(exp):
+    if len(exp) != 1 or not isinstance(exp[0], Fact):
+        raise ValueError("UNIQUE accepts only one pattern.")
+    else:
+        pattern = exp[0]
+        notpattern = pattern.copy()
+
+        if '__bind__' in notpattern:
+            del notpattern['__bind__']
+
+        fcname = "__factid__%d" % id(exp)
+        pattern['__factid__'] = W(fcname)
+        notpattern['__factid__'] = ~W(fcname)
+
+        return dnf(AND(pattern, NOT(notpattern)))
 
 
 @dnf.register(Fact)

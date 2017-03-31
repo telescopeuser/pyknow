@@ -58,3 +58,9 @@ class EXISTS(OperableCE, ConditionalElement):
 
 class FORALL(OperableCE, ConditionalElement):
     pass
+
+
+class UNIQUE(OperableCE, ConditionalElement):
+    def __rlshift__(self, other):
+        self[0].__rlshift__(other)
+        return self

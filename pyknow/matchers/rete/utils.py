@@ -1,4 +1,4 @@
-from functools import singledispatch, lru_cache
+from functools import singledispatch
 import warnings
 
 from .check import FeatureCheck, TypeCheck, FactCapture, SameContextCheck
@@ -7,7 +7,8 @@ from .dnf import dnf
 from .nodes import ConflictSetNode, NotNode, OrdinaryMatchNode
 from .nodes import FeatureTesterNode, WhereNode
 from pyknow.conditionalelement import ConditionalElement
-from pyknow.conditionalelement import NOT, OR, AND, TEST, EXISTS, FORALL
+from pyknow.conditionalelement import NOT, OR, AND
+from pyknow.conditionalelement import TEST, EXISTS, FORALL, UNIQUE
 from pyknow.fact import InitialFact, Fact
 from pyknow.fieldconstraint import ANDFC, ORFC, NOTFC
 from pyknow.fieldconstraint import L, P, W

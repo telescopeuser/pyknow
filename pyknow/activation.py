@@ -2,7 +2,6 @@
 Activations represent rules that matches against a specific factlist.
 
 """
-from functools import lru_cache
 from collections.abc import Iterable
 
 from pyknow.rule import Rule

@@ -350,3 +350,43 @@ def test_ANDNOT_reactivation():
 
     ke.retract(f4)
     assert not ke.agenda.activations
+
+
+def test_UNIQUE():
+    from pyknow import KnowledgeEngine, Rule, UNIQUE, Fact
+
+    class KE(KnowledgeEngine):
+        @Rule(UNIQUE(Fact(color="red")))
+        def only_one_red(self):
+            pass
+
+    ke = KE()
+    ke.reset()
+    assert not ke.agenda.activations
+    ke.declare(Fact(color="red"))
+    assert len(ke.agenda.activations) == 1
+    ke.declare(Fact(color="brown"))
+    assert len(ke.agenda.activations) == 1
+    f1 = ke.declare(Fact(color="red", other=True))
+    assert not ke.agenda.activations
+    ke.retract(f1)
+    assert len(ke.agenda.activations) == 1
+
+
+def test_UNIQUE_binding():
+    from pyknow import KnowledgeEngine, Rule, UNIQUE, Fact
+
+    expected = Fact(color="red")
+
+    class KE(KnowledgeEngine):
+        @Rule("f1" << UNIQUE(Fact(color="red")))
+        def only_one_red(self, f1):
+            nonlocal expected
+            assert f1 == expected
+
+    ke = KE()
+    ke.reset()
+    assert not ke.agenda.activations
+    ke.declare(expected)
+    assert ke.agenda.activations
+    ke.run()

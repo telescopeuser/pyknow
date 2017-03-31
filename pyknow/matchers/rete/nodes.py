@@ -229,6 +229,8 @@ class OrdinaryMatchNode(mixins.AnyChild,
                           self.left_memory,
                           is_left=False)
 
+    def __str__(self):
+        return "%s (%s)" % (self.__class__.__name__, id(self))
 
 class ConflictSetNode(mixins.AnyChild,
                       OneInputNode):
@@ -277,15 +279,11 @@ class ConflictSetNode(mixins.AnyChild,
                 else:
                     self.added.append(activation)
         else:
-            try:
-                self.memory.remove(info)
-            except ValueError:
-                pass
+            self.memory.remove(info)
+            if activation in self.added:
+                self.added.remove(activation)
             else:
-                if activation in self.added:
-                    self.added.remove(activation)
-                else:
-                    self.removed.append(activation)
+                self.removed.append(activation)
 
     def get_activations(self):
         """Return a list of activations."""
@@ -396,3 +394,6 @@ class NotNode(mixins.AnyChild,
 
                     for child in self.children:
                         child.callback(newtoken)
+
+    def __str__(self):
+        return "%s (%s)" % (self.__class__.__name__, id(self))

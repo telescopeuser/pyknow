@@ -13,7 +13,8 @@ def test_conditionalelement_exists():
                                   'NOT',
                                   'TEST',
                                   'EXISTS',
-                                  'FORALL'])
+                                  'FORALL',
+                                  'UNIQUE'])
 def test_existence_of_conditional_elements(name):
     from pyknow import conditionalelement
 
